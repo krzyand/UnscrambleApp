@@ -49,23 +49,35 @@ class GameFragment : Fragment() {
         binding = GameFragmentBinding.inflate(inflater, container, false)
         Log.d("GameFragment", "GameFragment created/re-created!")
 
-        Log.d("GameFragment", "Word: ${viewModel.currentScrambledWord} " +
-                "Score: ${viewModel.score} WordCount: ${viewModel.currentWordCount}")
+        Log.d(
+            "GameFragment", "Word: ${viewModel.currentScrambledWord} " +
+                    "Score: ${viewModel.score} WordCount: ${viewModel.currentWordCount}"
+        )
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Observe the currentScrambledWord LiveData.
+        viewModel.currentScrambledWord.observe(viewLifecycleOwner) { newWord ->
+            binding.textViewUnscrambledWord.text = newWord
+        }
+
         // Setup a click listener for the Submit and Skip buttons.
         binding.submit.setOnClickListener { onSubmitWord() }
         binding.skip.setOnClickListener { onSkipWord() }
         // Update the UI
-        updateNextWordOnScreen()
-        binding.score.text = getString(R.string.score, 0)
-        binding.wordCount.text = getString(
-            R.string.word_count, 0, MAX_NO_OF_WORDS
-        )
+        // updateNextWordOnScreen()
+
+        viewModel.score.observe(viewLifecycleOwner) { newScore ->
+            binding.score.text = getString(R.string.score, newScore)
+        }
+        viewModel.currentWordCount.observe(viewLifecycleOwner) { newWordCount ->
+            binding.wordCount.text = getString(R.string.word_count, newWordCount, MAX_NO_OF_WORDS)
+        }
+        // binding.score.text = getString(R.string.score, 0)
+        // binding.wordCount.text = getString( R.string.word_count, 0, MAX_NO_OF_WORDS)
     }
 
     override fun onDetach() {
@@ -82,107 +94,106 @@ class GameFragment : Fragment() {
 
         if (viewModel.isUserWordCorrect(playerWord)) {
             setErrorTextField(false)
-            if (viewModel.nextWord()) {
-                updateNextWordOnScreen()
-            } else {
+            if (!viewModel.nextWord()) {
                 showFinalScoreDialog()
             }
         } else {
-            setErrorTextField(true)
+                setErrorTextField(true)
         }
-
-        /*
-        currentScrambledWord = getNextScrambledWord()
-        currentWordCount++
-        score += SCORE_INCREASE
-        binding.wordCount.text = getString(R.string.word_count, currentWordCount, MAX_NO_OF_WORDS)
-        binding.score.text = getString(R.string.score, score)
-        setErrorTextField(false)
-        updateNextWordOnScreen()
-         */
-    }
-
-    /*
-     * Skips the current word without changing the score.
-     * Increases the word count.
-     */
-    private fun onSkipWord() {
-        if (viewModel.nextWord()) {
+            /*
+            currentScrambledWord = getNextScrambledWord()
+            currentWordCount++
+            score += SCORE_INCREASE
+            binding.wordCount.text = getString(R.string.word_count, currentWordCount, MAX_NO_OF_WORDS)
+            binding.score.text = getString(R.string.score, score)
             setErrorTextField(false)
             updateNextWordOnScreen()
-        } else {
-            showFinalScoreDialog()
-        }
+             */
+    }
+
         /*
-        currentScrambledWord = getNextScrambledWord()
-        currentWordCount++
-        binding.wordCount.text = getString(R.string.word_count, currentWordCount, MAX_NO_OF_WORDS)
-        setErrorTextField(false)
-        updateNextWordOnScreen()
-
+         * Skips the current word without changing the score.
+         * Increases the word count.
          */
-    }
+        private fun onSkipWord() {
+            if (viewModel.nextWord()) {
+                setErrorTextField(false)
+       //         updateNextWordOnScreen()
+            } else {
+                showFinalScoreDialog()
+            }
+            /*
+            currentScrambledWord = getNextScrambledWord()
+            currentWordCount++
+            binding.wordCount.text = getString(R.string.word_count, currentWordCount, MAX_NO_OF_WORDS)
+            setErrorTextField(false)
+            updateNextWordOnScreen()
 
-    /*
-     * Gets a random word for the list of words and shuffles the letters in it.
-     */
-    private fun getNextScrambledWord(): String {
-        val tempWord = allWordsList.random().toCharArray()
-        tempWord.shuffle()
-        return String(tempWord)
-    }
+             */
+        }
 
-    /*
-     * Re-initializes the data in the ViewModel and updates the views with the new data, to
-     * restart the game.
-     */
-    private fun restartGame() {
-        viewModel.reinitializeData()
-        setErrorTextField(false)
-        updateNextWordOnScreen()
-    }
+        /*
+         * Gets a random word for the list of words and shuffles the letters in it.
+         */
+        private fun getNextScrambledWord(): String {
+            val tempWord = allWordsList.random().toCharArray()
+            tempWord.shuffle()
+            return String(tempWord)
+        }
 
-    /*
-     * Exits the game.
-     */
-    private fun exitGame() {
-        activity?.finish()
-    }
+        /*
+         * Re-initializes the data in the ViewModel and updates the views with the new data, to
+         * restart the game.
+         */
+        private fun restartGame() {
+            viewModel.reinitializeData()
+            setErrorTextField(false)
+            // updateNextWordOnScreen()
+        }
 
-    /*
-    * Sets and resets the text field error status.
-    */
-    private fun setErrorTextField(error: Boolean) {
-        if (error) {
-            binding.textField.isErrorEnabled = true
-            binding.textField.error = getString(R.string.try_again)
-        } else {
-            binding.textField.isErrorEnabled = false
-            binding.textInputEditText.text = null
+        /*
+         * Exits the game.
+         */
+        private fun exitGame() {
+            activity?.finish()
+        }
+
+        /*
+        * Sets and resets the text field error status.
+        */
+        private fun setErrorTextField(error: Boolean) {
+            if (error) {
+                binding.textField.isErrorEnabled = true
+                binding.textField.error = getString(R.string.try_again)
+            } else {
+                binding.textField.isErrorEnabled = false
+                binding.textInputEditText.text = null
+            }
+        }
+
+        /*
+         * Displays the next scrambled word on screen.
+         */
+        /* to remove insead of this - LiveData
+        private fun updateNextWordOnScreen() {
+            binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
+        }
+        */
+
+        /*
+        * Creates and shows an AlertDialog with the final score.
+        */
+        private fun showFinalScoreDialog() {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.congratulations))
+                .setMessage(getString(R.string.you_scored, viewModel.score.value))
+                .setCancelable(false)
+                .setNegativeButton(getString(R.string.exit)) { _, _ ->
+                    exitGame()
+                }
+                .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+                    restartGame()
+                }
+                .show()
         }
     }
-
-    /*
-     * Displays the next scrambled word on screen.
-     */
-    private fun updateNextWordOnScreen() {
-        binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
-    }
-
-    /*
-    * Creates and shows an AlertDialog with the final score.
-    */
-    private fun showFinalScoreDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.congratulations))
-            .setMessage(getString(R.string.you_scored, viewModel.score))
-            .setCancelable(false)
-            .setNegativeButton(getString(R.string.exit)) { _, _ ->
-                exitGame()
-            }
-            .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-                restartGame()
-            }
-            .show()
-    }
-}
