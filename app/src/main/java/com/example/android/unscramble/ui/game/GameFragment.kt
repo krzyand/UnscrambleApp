@@ -65,10 +65,17 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.gameViewModel = viewModel
+        binding.maxNoOfWords = MAX_NO_OF_WORDS
+
+        // Specify the fragment view as the lifecycle owner of the binding.
+        // This is used so that the binding can observe LiveData updates
+        binding.lifecycleOwner = viewLifecycleOwner
+
         // Observe the currentScrambledWord LiveData.
-        viewModel.currentScrambledWord.observe(viewLifecycleOwner) { newWord ->
-            binding.textViewUnscrambledWord.text = newWord
-        }
+//        viewModel.currentScrambledWord.observe(viewLifecycleOwner) { newWord ->
+//            binding.textViewUnscrambledWord.text = newWord
+//        }
 
         // Setup a click listener for the Submit and Skip buttons.
         binding.submit.setOnClickListener { onSubmitWord() }
@@ -76,12 +83,12 @@ class GameFragment : Fragment() {
         // Update the UI
         // updateNextWordOnScreen()
 
-        viewModel.score.observe(viewLifecycleOwner) { newScore ->
-            binding.score.text = getString(R.string.score, newScore)
-        }
-        viewModel.currentWordCount.observe(viewLifecycleOwner) { newWordCount ->
-            binding.wordCount.text = getString(R.string.word_count, newWordCount, MAX_NO_OF_WORDS)
-        }
+//        viewModel.score.observe(viewLifecycleOwner) { newScore ->
+//            binding.score.text = getString(R.string.score, newScore)
+//        }
+//        viewModel.currentWordCount.observe(viewLifecycleOwner) { newWordCount ->
+//            binding.wordCount.text = getString(R.string.word_count, newWordCount, MAX_NO_OF_WORDS)
+//        }
         // binding.score.text = getString(R.string.score, 0)
         // binding.wordCount.text = getString( R.string.word_count, 0, MAX_NO_OF_WORDS)
     }
