@@ -16,7 +16,6 @@
 
 package com.example.android.unscramble.ui.game
 
-import android.database.DatabaseUtils
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -93,11 +92,6 @@ class GameFragment : Fragment() {
         // binding.wordCount.text = getString( R.string.word_count, 0, MAX_NO_OF_WORDS)
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("GameFragment", "GameFragment destroyed!")
-    }
-
     /*
         * Checks the user's word, and updates the score accordingly.
         * Displays the next scrambled word.
@@ -148,11 +142,11 @@ class GameFragment : Fragment() {
         /*
          * Gets a random word for the list of words and shuffles the letters in it.
          */
-        private fun getNextScrambledWord(): String {
-            val tempWord = allWordsList.random().toCharArray()
-            tempWord.shuffle()
-            return String(tempWord)
-        }
+//        private fun getNextScrambledWord(): String {
+//            val tempWord = allWordsList.random().toCharArray()
+//            tempWord.shuffle()
+//            return String(tempWord)
+//        }
 
         /*
          * Re-initializes the data in the ViewModel and updates the views with the new data, to
